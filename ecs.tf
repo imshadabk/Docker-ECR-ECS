@@ -73,20 +73,21 @@ security_groups = [aws_security_group.alb_sg.id]
 subnets = data.aws_subnets.public.ids
 }
 
-
 resource "aws_lb_target_group" "tg" {
-name = "react-app-tg"
-port = 80
-protocol = "HTTP"
-vpc_id = data.aws_vpc.default.id
-health_check {
-path = "/"
-matcher = "200-399"
-interval = 30
-timeout = 5
-healthy_threshold = 2
-unhealthy_threshold = 2
-}
+  name        = "react-app-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = data.aws_vpc.default.id
+  target_type = "ip"   # REQUIRED for Fargate + awsvpc
+
+  health_check {
+    path                = "/"
+    matcher             = "200-399"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
 }
 
 resource "aws_lb_listener" "http" {
@@ -123,4 +124,5 @@ container_port = 80
 
 
 depends_on = [aws_lb_listener.http]
+
 }
